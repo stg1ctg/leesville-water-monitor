@@ -139,3 +139,104 @@ async function scrapeWaterLevels() {
     }
   }
 }
+
+// API Routes
+app.get('/api/current', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT leesville_forebay, smith_mountain_tailwater, timestamp, data_updated_at
+      FROM water_levels 
+      WHERE scrape_successful = true
+      ORDER BY timestamp DESC 
+      LIMIT 1
+    `);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No data available' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/history', async (req, res) => {
+  try {
+    const { hours = 24 } = req.query;
+    const hoursInt = parseInt(hours);
+    
+    if (isNaN(hoursInt) || hoursInt < 1 || hoursInt > 8760) { // Max 1 year
+      return res.status(400).json({ error: 'Invalid hours parameter' });
+    }
+    
+    const result = await pool.query(`
+      SELECT leesville_forebay, smith_mountain_tailwater, timestamp
+      FROM water_levels 
+      WHERE scrape_successful = true
+        AND timestamp >= NOW() - INTERVAL '${hoursInt} hours'
+      ORDER BY timestamp ASC
+    `);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/stats', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COUNT(*) as total_records,
+        COUNT(CASE WHEN scrape_successful = true THEN 1 END) as successful_scrapes,
+        MIN(timestamp) as first_record,
+        MAX(timestamp) as last_record,
+        AVG(leesville_forebay) as avg_leesville,
+        AVG(smith_mountain_tailwater) as avg_smith_mountain
+      FROM water_levels
+      WHERE timestamp >= NOW() - INTERVAL '30 days'
+    `);
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('API error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Serve main page
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Schedule scraping every 15 minutes
+cron.schedule('*/15 * * * *', async () => {
+  console.log('Running scheduled scrape...');
+  try {
+    await scrapeWaterLevels();
+  } catch (error) {
+    console.error('Scheduled scrape failed:', error);
+  }
+});
+
+// Initialize and start server
+async function startServer() {
+  await initializeDatabase();
+  
+  // Run initial scrape
+  try {
+    console.log('Running initial scrape...');
+    await scrapeWaterLevels();
+  } catch (error) {
+    console.error('Initial scrape failed:', error);
+  }
+  
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+startServer().catch(console.error);
