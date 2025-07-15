@@ -5,7 +5,7 @@ const cors = require('cors');
 const cron = require('node-cron');
 const { Pool } = require('pg');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; 
 
 // Database connection
 const pool = new Pool({
