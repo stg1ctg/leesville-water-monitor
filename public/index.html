@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leesville Lake Water Levels</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/index.min.js"></script>
     <style>
         * {
@@ -256,13 +257,13 @@
         <div class="current-levels">
             <div class="level-card">
                 <h3>Leesville Lake</h3>
-                <div class="level-value" id="leesville-level">--</div>
+                <div class="level-value" id="leesville-level">Loading...</div>
                 <div class="level-unit">feet above sea level</div>
                 <div class="level-status status-normal" id="leesville-status">Loading...</div>
             </div>
             <div class="level-card">
                 <h3>Smith Mountain Tailwater</h3>
-                <div class="level-value" id="smith-level">--</div>
+                <div class="level-value" id="smith-level">Loading...</div>
                 <div class="level-unit">feet above sea level</div>
                 <div class="level-status status-normal" id="smith-status">Loading...</div>
             </div>
@@ -309,6 +310,13 @@
         <div class="last-updated" id="last-updated">
             Last updated: Loading...
         </div>
+        
+        <!-- Debug panel (remove in production) -->
+        <div style="background: #f0f0f0; padding: 10px; margin: 20px 0; border-radius: 5px; font-family: monospace; font-size: 12px;">
+            <h4>Debug Info:</h4>
+            <div id="debug-info">Check browser console for API responses</div>
+            <button onclick="testAPI()" style="margin-top: 10px; padding: 5px 10px;">Test API Endpoints</button>
+        </div>
     </div>
 
     <script>
@@ -317,12 +325,19 @@
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            // Add some debugging info
+            console.log('Current URL:', window.location.href);
+            console.log('API endpoints will be called from:', window.location.origin);
+            
             loadCurrentLevels();
             loadHistoricalData(24);
             loadStats();
             
             // Refresh data every 5 minutes
             setInterval(() => {
+                console.log('Auto-refreshing data...');
                 loadCurrentLevels();
                 loadHistoricalData(currentHours);
             }, 5 * 60 * 1000);
@@ -330,26 +345,38 @@
 
         async function loadCurrentLevels() {
             try {
+                console.log('Loading current levels...');
                 const response = await fetch('/api/current');
                 const data = await response.json();
-                
+
+                console.log('Current levels response:', response.status, data);
+
                 if (response.ok) {
-                    document.getElementById('leesville-level').textContent = data.leesville_forebay?.toFixed(2) || '--';
-                    document.getElementById('smith-level').textContent = data.smith_mountain_tailwater?.toFixed(2) || '--';
-                    
-                    // Update status indicators (basic logic - you can enhance this)
-                    updateStatus('leesville-status', data.leesville_forebay, 613.0); // Normal full pond
-                    updateStatus('smith-status', data.smith_mountain_tailwater, 603.0); // Approximate normal
-                    
-                    // Update last updated time
-                    const lastUpdated = new Date(data.timestamp);
-                    document.getElementById('last-updated').textContent = 
-                        `Last updated: ${lastUpdated.toLocaleDateString()} ${lastUpdated.toLocaleTimeString()}`;
+                    const leesvilleLevel = parseFloat(data.leesville_forebay);
+                    const smithLevel = parseFloat(data.smith_mountain_tailwater);
+
+                    document.getElementById('leesville-level').textContent =
+                        !isNaN(leesvilleLevel) ? leesvilleLevel.toFixed(2) : '--';
+                    document.getElementById('smith-level').textContent =
+                        !isNaN(smithLevel) ? smithLevel.toFixed(2) : '--';
+
+                    updateStatus('leesville-status', leesvilleLevel, 613.0);
+                    updateStatus('smith-status', smithLevel, 603.0);
+
+                    if (data.timestamp) {
+                        const lastUpdated = new Date(data.timestamp);
+                        document.getElementById('last-updated').textContent =
+                            `Last updated: ${lastUpdated.toLocaleDateString()} ${lastUpdated.toLocaleTimeString()}`;
+                    }
                 } else {
                     console.error('Failed to load current levels:', data.error);
+                    document.getElementById('leesville-level').textContent = 'Error';
+                    document.getElementById('smith-level').textContent = 'Error';
                 }
             } catch (error) {
                 console.error('Error loading current levels:', error);
+                document.getElementById('leesville-level').textContent = 'Error';
+                document.getElementById('smith-level').textContent = 'Error';
             }
         }
 
@@ -376,36 +403,83 @@
 
         async function loadHistoricalData(hours) {
             currentHours = hours;
-            
-            // Update active button
+
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
+            const clickedButton = document.querySelector(`[onclick="loadHistoricalData(${hours})"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
             try {
+                console.log(`Loading historical data for ${hours} hours...`);
                 const response = await fetch(`/api/history?hours=${hours}`);
                 const data = await response.json();
-                
+
+                console.log('Historical data response:', response.status, data);
+
                 if (response.ok) {
-                    updateChart(data);
+                    if (data.length > 0) {
+                        updateChart(data);
+                    } else {
+                        console.log('No historical data available');
+                        updateChart([]);
+                    }
                 } else {
                     console.error('Failed to load historical data:', data.error);
+                    updateChart([]);
                 }
             } catch (error) {
                 console.error('Error loading historical data:', error);
+                updateChart([]);
             }
         }
 
         function updateChart(data) {
             const ctx = document.getElementById('waterLevelChart').getContext('2d');
-            
+
             if (chart) {
                 chart.destroy();
             }
-            
+
+            console.log('Updating chart with data:', data);
+
+            if (!data || data.length === 0) {
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'No Data Available',
+                            data: [],
+                            borderColor: '#ccc',
+                            backgroundColor: 'rgba(204, 204, 204, 0.1)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: false
+                            },
+                            y: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
             const labels = data.map(item => new Date(item.timestamp));
             const leesvilleData = data.map(item => item.leesville_forebay);
             const smithData = data.map(item => item.smith_mountain_tailwater);
-            
+
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -464,22 +538,75 @@
 
         async function loadStats() {
             try {
+                console.log('Loading stats...');
                 const response = await fetch('/api/stats');
                 const data = await response.json();
                 
+                console.log('Stats response:', response.status, data);
+                
                 if (response.ok) {
-                    document.getElementById('total-records').textContent = data.total_records || '--';
+                    document.getElementById('total-records').textContent = data.total_records || '0';
                     document.getElementById('success-rate').textContent = 
-                        data.total_records ? Math.round((data.successful_scrapes / data.total_records) * 100) + '%' : '--';
+                        data.total_records ? Math.round((data.successful_scrapes / data.total_records) * 100) + '%' : '0%';
                     document.getElementById('avg-leesville').textContent = 
                         data.avg_leesville ? parseFloat(data.avg_leesville).toFixed(2) + ' ft' : '--';
                     document.getElementById('avg-smith').textContent = 
                         data.avg_smith_mountain ? parseFloat(data.avg_smith_mountain).toFixed(2) + ' ft' : '--';
                 } else {
                     console.error('Failed to load stats:', data.error);
+                    // Show error in stats
+                    document.getElementById('total-records').textContent = 'Error';
+                    document.getElementById('success-rate').textContent = 'Error';
+                    document.getElementById('avg-leesville').textContent = 'Error';
+                    document.getElementById('avg-smith').textContent = 'Error';
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
+                // Show error in stats
+                document.getElementById('total-records').textContent = 'Error';
+                document.getElementById('success-rate').textContent = 'Error';
+                document.getElementById('avg-leesville').textContent = 'Error';
+                document.getElementById('avg-smith').textContent = 'Error';
+            }
+        }
+        
+        // Debug function to test API endpoints
+        async function testAPI() {
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = 'Testing API endpoints...<br>';
+            
+            try {
+                // Test /api/debug endpoint
+                console.log('Testing /api/debug...');
+                const debugResponse = await fetch('/api/debug');
+                const debugData = await debugResponse.json();
+                console.log('Debug API response:', debugData);
+                debugInfo.innerHTML += `Debug API (${debugResponse.status}): ${debugData.count} records<br>`;
+                
+                // Test /api/current endpoint
+                console.log('Testing /api/current...');
+                const currentResponse = await fetch('/api/current');
+                const currentData = await currentResponse.json();
+                console.log('Current API response:', currentData);
+                debugInfo.innerHTML += `Current API (${currentResponse.status}): ${JSON.stringify(currentData)}<br>`;
+                
+                // Test /api/history endpoint
+                console.log('Testing /api/history...');
+                const historyResponse = await fetch('/api/history?hours=24');
+                const historyData = await historyResponse.json();
+                console.log('History API response:', historyData);
+                debugInfo.innerHTML += `History API (${historyResponse.status}): ${historyData.length} records<br>`;
+                
+                // Test /api/stats endpoint
+                console.log('Testing /api/stats...');
+                const statsResponse = await fetch('/api/stats');
+                const statsData = await statsResponse.json();
+                console.log('Stats API response:', statsData);
+                debugInfo.innerHTML += `Stats API (${statsResponse.status}): ${JSON.stringify(statsData)}<br>`;
+                
+            } catch (error) {
+                console.error('API test error:', error);
+                debugInfo.innerHTML += `Error: ${error.message}<br>`;
             }
         }
     </script>
