@@ -265,21 +265,65 @@ app.get('/api/history', async (req, res) => {
 app.get('/api/stats', async (req, res) => {
   try {
     console.log('API /stats called');
-    const result = await pool.query(`
+    
+    // Get 24 hour high/low
+    const last24h = await pool.query(`
       SELECT 
-        COUNT(*) as total_records,
-        COUNT(CASE WHEN scrape_successful = true THEN 1 END) as successful_scrapes,
-        MIN(timestamp) as first_record,
-        MAX(timestamp) as last_record,
-        AVG(leesville_forebay) as avg_leesville,
-        AVG(smith_mountain_tailwater) as avg_smith_mountain
+        MAX(leesville_forebay) as high_24h,
+        MIN(leesville_forebay) as low_24h
       FROM water_levels
-      WHERE timestamp >= NOW() - INTERVAL '30 days'
+      WHERE scrape_successful = true
+        AND timestamp >= NOW() - INTERVAL '24 hours'
     `);
     
-    console.log('Stats query result:', result.rows[0]);
+    // Get 7 day high/low
+    const last7d = await pool.query(`
+      SELECT 
+        MAX(leesville_forebay) as high_7d,
+        MIN(leesville_forebay) as low_7d
+      FROM water_levels
+      WHERE scrape_successful = true
+        AND timestamp >= NOW() - INTERVAL '7 days'
+    `);
     
-    res.json(result.rows[0]);
+    // Get all-time high
+    const allTimeHigh = await pool.query(`
+      SELECT 
+        leesville_forebay as all_time_high,
+        timestamp as all_time_high_date
+      FROM water_levels
+      WHERE scrape_successful = true
+        AND leesville_forebay IS NOT NULL
+      ORDER BY leesville_forebay DESC
+      LIMIT 1
+    `);
+    
+    // Get all-time low
+    const allTimeLow = await pool.query(`
+      SELECT 
+        leesville_forebay as all_time_low,
+        timestamp as all_time_low_date
+      FROM water_levels
+      WHERE scrape_successful = true
+        AND leesville_forebay IS NOT NULL
+      ORDER BY leesville_forebay ASC
+      LIMIT 1
+    `);
+    
+    const stats = {
+      high_24h: last24h.rows[0]?.high_24h || null,
+      low_24h: last24h.rows[0]?.low_24h || null,
+      high_7d: last7d.rows[0]?.high_7d || null,
+      low_7d: last7d.rows[0]?.low_7d || null,
+      all_time_high: allTimeHigh.rows[0]?.all_time_high || null,
+      all_time_high_date: allTimeHigh.rows[0]?.all_time_high_date || null,
+      all_time_low: allTimeLow.rows[0]?.all_time_low || null,
+      all_time_low_date: allTimeLow.rows[0]?.all_time_low_date || null
+    };
+    
+    console.log('Stats query result:', stats);
+    
+    res.json(stats);
   } catch (error) {
     console.error('API /stats error:', error);
     res.status(500).json({ error: 'Internal server error' });

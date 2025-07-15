@@ -303,7 +303,7 @@
     <div class="container">
         <div class="header">
             <h1>🌊 Leesville Lake Monitor</h1>
-            <p>Real-time water level tracking for Leesville Lake and Smith Mountain</p>
+            <p>Real-time water level tracking for Leesville Lake</p>
         </div>
 
         <div class="current-level">
@@ -409,15 +409,11 @@
 
                 if (response.ok) {
                     const leesvilleLevel = parseFloat(data.leesville_forebay);
-                    const smithLevel = parseFloat(data.smith_mountain_tailwater);
 
                     document.getElementById('leesville-level').textContent =
                         !isNaN(leesvilleLevel) ? leesvilleLevel.toFixed(2) : '--';
-                    document.getElementById('smith-level').textContent =
-                        !isNaN(smithLevel) ? smithLevel.toFixed(2) : '--';
 
                     updateStatus('leesville-status', leesvilleLevel, 613.0);
-                    updateStatus('smith-status', smithLevel, 603.0);
 
                     if (data.timestamp) {
                         const lastUpdated = new Date(data.timestamp);
@@ -427,12 +423,12 @@
                 } else {
                     console.error('Failed to load current levels:', data.error);
                     document.getElementById('leesville-level').textContent = 'Error';
-                    document.getElementById('smith-level').textContent = 'Error';
+                    document.getElementById('leesville-status').textContent = data.error || 'No Data';
                 }
             } catch (error) {
                 console.error('Error loading current levels:', error);
                 document.getElementById('leesville-level').textContent = 'Error';
-                document.getElementById('smith-level').textContent = 'Error';
+                document.getElementById('leesville-status').textContent = 'Connection Error';
             }
         }
 
@@ -541,7 +537,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Lake Level',
+                        label: 'Leesville Lake (Forebay)',
                         data: leesvilleData,
                         borderColor: '#4299e1',
                         backgroundColor: 'rgba(66, 153, 225, 0.1)',
@@ -551,6 +547,19 @@
                         pointRadius: 4,
                         pointHoverRadius: 8,
                         pointBackgroundColor: '#4299e1',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }, {
+                        label: 'Smith Mountain (Tailwater)',
+                        data: smithData,
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#48bb78',
                         pointBorderColor: '#ffffff',
                         pointBorderWidth: 2
                     }]
@@ -587,7 +596,7 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Lake Level (feet above sea level)',
+                                text: 'Water Level (feet above sea level)',
                                 font: {
                                     size: 16,
                                     weight: 'bold'
