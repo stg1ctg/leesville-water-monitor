@@ -1,17 +1,14 @@
-const { chromium } = require('playwright');
-
-// Data scraping function using browserless
+// Data scraping function
 async function scrapeWaterLevels() {
   let browser;
   try {
     console.log('Starting water level scrape...');
     
-    // Connect to browserless service
+    // Connect to Browserless instance
     const browserlessUrl = process.env.BROWSERLESS_URL || 'ws://localhost:3000';
+    browser = await playwright.chromium.connect(browserlessUrl);
     
-    browser = await chromium.connect(browserlessUrl);
     const page = await browser.newPage();
-    
     await page.goto('https://www.aep.com/recreation/hydro', {
       waitUntil: 'networkidle',
       timeout: 30000
@@ -83,7 +80,7 @@ async function scrapeWaterLevels() {
       throw new Error('Failed to extract water level data');
     }
 
-    // Store in database
+    // Store in database - no need for data_updated_at, timestamp column handles this
     const query = `
       INSERT INTO water_levels (leesville_forebay, smith_mountain_tailwater)
       VALUES ($1, $2)
@@ -103,7 +100,7 @@ async function scrapeWaterLevels() {
   } catch (error) {
     console.error('Scraping error:', error);
     
-    // Log failed scrape attempt
+    // Log failed scrape attempt - no need for data_updated_at here either
     try {
       await pool.query(`
         INSERT INTO water_levels (scrape_successful)
