@@ -152,7 +152,7 @@ async function scrapeWaterLevels() {
           }
         }
       }
-      onsole.log('Finishing water level scrape...');
+      console.log('Finishing water level scrape...');
 
       
       return {
