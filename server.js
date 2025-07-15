@@ -67,25 +67,31 @@ async function scrapeWaterLevels() {
       throw new Error('BROWSERLESS_URL environment variable is required');
     }
 
+    if (!browserlessToken) {
+      throw new Error('BROWSERLESS_TOKEN environment variable is required');
+    }
+
+    // For Railway browserless, use the /playwright endpoint with token
     let connectionUrl;
     
-    // Handle different URL formats and authentication
-    if (browserlessUrl.startsWith('ws://') || browserlessUrl.startsWith('wss://')) {
-      // WebSocket URL - add token as query parameter if provided
-      connectionUrl = browserlessToken 
-        ? `${browserlessUrl}?token=${browserlessToken}`
-        : browserlessUrl;
-    } else if (browserlessUrl.startsWith('http://') || browserlessUrl.startsWith('https://')) {
-      // HTTP URL - convert to WebSocket and add token
-      const wsUrl = browserlessUrl.replace(/^https?:\/\//, 'wss://');
-      connectionUrl = browserlessToken 
-        ? `${wsUrl}?token=${browserlessToken}`
-        : wsUrl;
+    if (browserlessUrl.includes('railway.app')) {
+      // Railway browserless format
+      connectionUrl = `${browserlessUrl}/playwright?token=${browserlessToken}`;
     } else {
-      throw new Error('Invalid BROWSERLESS_URL format. Must start with ws://, wss://, http://, or https://');
+      // Handle other browserless services
+      if (browserlessUrl.startsWith('ws://') || browserlessUrl.startsWith('wss://')) {
+        connectionUrl = `${browserlessUrl}?token=${browserlessToken}`;
+      } else if (browserlessUrl.startsWith('http://') || browserlessUrl.startsWith('https://')) {
+        const wsUrl = browserlessUrl.replace(/^https?:\/\//, 'wss://');
+        connectionUrl = `${wsUrl}?token=${browserlessToken}`;
+      } else {
+        throw new Error('Invalid BROWSERLESS_URL format. Must start with ws://, wss://, http://, or https://');
+      }
     }
 
     console.log('Connecting to browserless service...');
+    console.log('Using connection URL:', connectionUrl.replace(browserlessToken, '***'));
+    
     browser = await chromium.connect(connectionUrl);
     const page = await browser.newPage();
     
@@ -146,6 +152,8 @@ async function scrapeWaterLevels() {
           }
         }
       }
+      onsole.log('Finishing water level scrape...');
+
       
       return {
         leesvilleForebay,

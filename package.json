@@ -15,14 +15,13 @@
     "smith-mountain",
     "hydro"
   ],
-  "author": "Your Name",
-  "license": "MIT",
+  "author": "Casey Grant",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "node-cron": "^3.0.3",
     "pg": "^8.11.3",
-    "playwright": "^1.40.0"
+    "playwright": "^1.41.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
