@@ -18,6 +18,41 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Initialize database table
+async function initializeDatabase() {
+  try {
+    console.log('Initializing database...');
+    
+    // Create table if it doesn't exist
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS water_levels (
+        id SERIAL PRIMARY KEY,
+        leesville_forebay DECIMAL(6,2),
+        smith_mountain_tailwater DECIMAL(6,2),
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        data_updated_at TIMESTAMP,
+        scrape_successful BOOLEAN DEFAULT true
+      );
+    `);
+    
+    // Create index for better performance
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_water_levels_timestamp 
+      ON water_levels(timestamp);
+    `);
+    
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_water_levels_successful 
+      ON water_levels(scrape_successful);
+    `);
+    
+    console.log('Database initialized successfully');
+  } catch (error) {
+    console.error('Database initialization error:', error);
+    throw error;
+  }
+}
+
 // Data scraping function using browserless
 async function scrapeWaterLevels() {
   let browser;
@@ -26,7 +61,6 @@ async function scrapeWaterLevels() {
 
     // Connect to browserless service
     const browserlessUrl = process.env.BROWSERLESS_URL || 'ws://localhost:3000';
-
 
     browser = await chromium.connect(browserlessUrl);
     const page = await browser.newPage();
