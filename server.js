@@ -1,14 +1,18 @@
-// Data scraping function
+const { chromium } = require('playwright');
+
+// Data scraping function using browserless
 async function scrapeWaterLevels() {
   let browser;
   try {
     console.log('Starting water level scrape...');
-    
-    // Connect to Browserless instance
+
+    // Connect to browserless service
     const browserlessUrl = process.env.BROWSERLESS_URL || 'ws://localhost:3000';
-    browser = await playwright.chromium.connect(browserlessUrl);
-    
+
+
+    browser = await chromium.connect(browserlessUrl);
     const page = await browser.newPage();
+    
     await page.goto('https://www.aep.com/recreation/hydro', {
       waitUntil: 'networkidle',
       timeout: 30000
