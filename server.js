@@ -59,10 +59,34 @@ async function scrapeWaterLevels() {
   try {
     console.log('Starting water level scrape...');
 
-    // Connect to browserless service
-    const browserlessUrl = process.env.BROWSERLESS_URL || 'ws://localhost:3000';
+    // Get browserless configuration
+    const browserlessUrl = process.env.BROWSERLESS_URL;
+    const browserlessToken = process.env.BROWSERLESS_TOKEN;
 
-    browser = await chromium.connect(browserlessUrl);
+    if (!browserlessUrl) {
+      throw new Error('BROWSERLESS_URL environment variable is required');
+    }
+
+    let connectionUrl;
+    
+    // Handle different URL formats and authentication
+    if (browserlessUrl.startsWith('ws://') || browserlessUrl.startsWith('wss://')) {
+      // WebSocket URL - add token as query parameter if provided
+      connectionUrl = browserlessToken 
+        ? `${browserlessUrl}?token=${browserlessToken}`
+        : browserlessUrl;
+    } else if (browserlessUrl.startsWith('http://') || browserlessUrl.startsWith('https://')) {
+      // HTTP URL - convert to WebSocket and add token
+      const wsUrl = browserlessUrl.replace(/^https?:\/\//, 'wss://');
+      connectionUrl = browserlessToken 
+        ? `${wsUrl}?token=${browserlessToken}`
+        : wsUrl;
+    } else {
+      throw new Error('Invalid BROWSERLESS_URL format. Must start with ws://, wss://, http://, or https://');
+    }
+
+    console.log('Connecting to browserless service...');
+    browser = await chromium.connect(connectionUrl);
     const page = await browser.newPage();
     
     await page.goto('https://www.aep.com/recreation/hydro', {
@@ -136,7 +160,7 @@ async function scrapeWaterLevels() {
       throw new Error('Failed to extract water level data');
     }
 
-    // Store in database - no need for data_updated_at, timestamp column handles this
+    // Store in database
     const query = `
       INSERT INTO water_levels (leesville_forebay, smith_mountain_tailwater)
       VALUES ($1, $2)
@@ -156,7 +180,7 @@ async function scrapeWaterLevels() {
   } catch (error) {
     console.error('Scraping error:', error);
     
-    // Log failed scrape attempt - no need for data_updated_at here either
+    // Log failed scrape attempt
     try {
       await pool.query(`
         INSERT INTO water_levels (scrape_successful)
