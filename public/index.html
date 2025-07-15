@@ -44,50 +44,52 @@
             opacity: 0.9;
         }
 
-        .current-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        .current-level {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
         }
 
-        .level-card {
+        .main-level-card {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             text-align: center;
             transition: transform 0.3s ease;
+            min-width: 400px;
         }
 
-        .level-card:hover {
-            transform: translateY(-5px);
+        .main-level-card:hover {
+            transform: translateY(-8px);
         }
 
-        .level-card h3 {
-            color: #4a5568;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+        .main-level-card h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: 600;
         }
 
-        .level-value {
-            font-size: 3em;
+        .main-level-value {
+            font-size: 4.5em;
             font-weight: bold;
             color: #2d3748;
-            margin-bottom: 10px;
-        }
-
-        .level-unit {
-            font-size: 1.2em;
-            color: #718096;
             margin-bottom: 15px;
+            line-height: 1.1;
         }
 
-        .level-status {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 500;
+        .main-level-unit {
+            font-size: 1.4em;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .main-level-status {
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
         }
 
         .status-normal {
@@ -105,56 +107,64 @@
             color: #744210;
         }
 
+        .chart-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 500px;
+        }
+
         .controls {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         .controls h3 {
-            margin-bottom: 15px;
-            color: #4a5568;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 1.4em;
         }
 
         .time-buttons {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
+            justify-content: center;
         }
 
         .time-btn {
             background: #4299e1;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 15px 30px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1.1em;
+            font-weight: 600;
             transition: all 0.3s ease;
+            min-width: 120px;
         }
 
         .time-btn:hover {
             background: #3182ce;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
         }
 
         .time-btn.active {
             background: #2d3748;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(45, 55, 72, 0.3);
         }
 
         .loading {
@@ -182,39 +192,57 @@
 
         .stats {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
 
         .stats h3 {
-            margin-bottom: 15px;
-            color: #4a5568;
+            margin-bottom: 25px;
+            color: #2d3748;
+            font-size: 1.6em;
+            text-align: center;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
         }
 
         .stat-item {
             text-align: center;
-            padding: 15px;
+            padding: 25px;
             background: #f7fafc;
-            border-radius: 10px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            border-color: #4299e1;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.1);
         }
 
         .stat-value {
-            font-size: 1.5em;
+            font-size: 2em;
             font-weight: bold;
             color: #2d3748;
+            margin-bottom: 8px;
         }
 
         .stat-label {
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat-sublabel {
             font-size: 0.9em;
             color: #718096;
-            margin-top: 5px;
+            font-style: italic;
         }
 
         .last-updated {
@@ -233,16 +261,40 @@
                 font-size: 2em;
             }
             
-            .level-value {
-                font-size: 2.5em;
+            .main-level-card {
+                min-width: auto;
+                padding: 30px 20px;
             }
             
-            .time-buttons {
-                justify-content: center;
+            .main-level-value {
+                font-size: 3.5em;
             }
             
             .chart-wrapper {
-                height: 300px;
+                height: 350px;
+            }
+            
+            .time-buttons {
+                gap: 10px;
+            }
+            
+            .time-btn {
+                padding: 12px 20px;
+                font-size: 1em;
+                min-width: 100px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .stat-item {
+                padding: 20px;
+            }
+            
+            .stat-value {
+                font-size: 1.6em;
             }
         }
     </style>
@@ -254,28 +306,12 @@
             <p>Real-time water level tracking for Leesville Lake and Smith Mountain</p>
         </div>
 
-        <div class="current-levels">
-            <div class="level-card">
-                <h3>Leesville Lake</h3>
-                <div class="level-value" id="leesville-level">Loading...</div>
-                <div class="level-unit">feet above sea level</div>
-                <div class="level-status status-normal" id="leesville-status">Loading...</div>
-            </div>
-            <div class="level-card">
-                <h3>Smith Mountain Tailwater</h3>
-                <div class="level-value" id="smith-level">Loading...</div>
-                <div class="level-unit">feet above sea level</div>
-                <div class="level-status status-normal" id="smith-status">Loading...</div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <h3>Historical Data</h3>
-            <div class="time-buttons">
-                <button class="time-btn active" onclick="loadHistoricalData(24)">24 Hours</button>
-                <button class="time-btn" onclick="loadHistoricalData(168)">7 Days</button>
-                <button class="time-btn" onclick="loadHistoricalData(720)">30 Days</button>
-                <button class="time-btn" onclick="loadHistoricalData(8760)">1 Year</button>
+        <div class="current-level">
+            <div class="main-level-card">
+                <h2>Lake Level</h2>
+                <div class="main-level-value" id="leesville-level">Loading...</div>
+                <div class="main-level-unit">feet above sea level</div>
+                <div class="main-level-status status-normal" id="leesville-status">Loading...</div>
             </div>
         </div>
 
@@ -285,24 +321,44 @@
             </div>
         </div>
 
+        <div class="controls">
+            <h3>Historical Range</h3>
+            <div class="time-buttons">
+                <button class="time-btn active" onclick="loadHistoricalData(24)">24 Hours</button>
+                <button class="time-btn" onclick="loadHistoricalData(168)">7 Days</button>
+                <button class="time-btn" onclick="loadHistoricalData(720)">30 Days</button>
+                <button class="time-btn" onclick="loadHistoricalData(8760)">1 Year</button>
+            </div>
+        </div>
+
         <div class="stats">
-            <h3>Statistics (Last 30 Days)</h3>
+            <h3>Lake Level Statistics</h3>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-value" id="total-records">--</div>
-                    <div class="stat-label">Total Records</div>
+                    <div class="stat-value" id="high-24h">--</div>
+                    <div class="stat-label">24 Hour High</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="success-rate">--</div>
-                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value" id="low-24h">--</div>
+                    <div class="stat-label">24 Hour Low</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="avg-leesville">--</div>
-                    <div class="stat-label">Avg Leesville Level</div>
+                    <div class="stat-value" id="high-7d">--</div>
+                    <div class="stat-label">7 Day High</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="avg-smith">--</div>
-                    <div class="stat-label">Avg Smith Mountain</div>
+                    <div class="stat-value" id="low-7d">--</div>
+                    <div class="stat-label">7 Day Low</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="all-time-high">--</div>
+                    <div class="stat-label">All Time High</div>
+                    <div class="stat-sublabel" id="all-time-high-date">--</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="all-time-low">--</div>
+                    <div class="stat-label">All Time Low</div>
+                    <div class="stat-sublabel" id="all-time-low-date">--</div>
                 </div>
             </div>
         </div>
@@ -485,21 +541,18 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Leesville Lake (Forebay)',
+                        label: 'Lake Level',
                         data: leesvilleData,
                         borderColor: '#4299e1',
                         backgroundColor: 'rgba(66, 153, 225, 0.1)',
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.1
-                    }, {
-                        label: 'Smith Mountain (Tailwater)',
-                        data: smithData,
-                        borderColor: '#48bb78',
-                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.1
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.1,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#4299e1',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
@@ -516,20 +569,51 @@
                             },
                             title: {
                                 display: true,
-                                text: 'Time'
+                                text: 'Time',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Water Level (feet above sea level)'
+                                text: 'Lake Level (feet above sea level)',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 14
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
                             }
                         }
                     },
                     plugins: {
                         legend: {
                             display: true,
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            }
                         }
                     }
                 }
@@ -545,28 +629,48 @@
                 console.log('Stats response:', response.status, data);
                 
                 if (response.ok) {
-                    document.getElementById('total-records').textContent = data.total_records || '0';
-                    document.getElementById('success-rate').textContent = 
-                        data.total_records ? Math.round((data.successful_scrapes / data.total_records) * 100) + '%' : '0%';
-                    document.getElementById('avg-leesville').textContent = 
-                        data.avg_leesville ? parseFloat(data.avg_leesville).toFixed(2) + ' ft' : '--';
-                    document.getElementById('avg-smith').textContent = 
-                        data.avg_smith_mountain ? parseFloat(data.avg_smith_mountain).toFixed(2) + ' ft' : '--';
+                    // 24 hour high/low
+                    document.getElementById('high-24h').textContent = 
+                        data.high_24h ? parseFloat(data.high_24h).toFixed(2) + ' ft' : '--';
+                    document.getElementById('low-24h').textContent = 
+                        data.low_24h ? parseFloat(data.low_24h).toFixed(2) + ' ft' : '--';
+                    
+                    // 7 day high/low
+                    document.getElementById('high-7d').textContent = 
+                        data.high_7d ? parseFloat(data.high_7d).toFixed(2) + ' ft' : '--';
+                    document.getElementById('low-7d').textContent = 
+                        data.low_7d ? parseFloat(data.low_7d).toFixed(2) + ' ft' : '--';
+                    
+                    // All-time high
+                    document.getElementById('all-time-high').textContent = 
+                        data.all_time_high ? parseFloat(data.all_time_high).toFixed(2) + ' ft' : '--';
+                    document.getElementById('all-time-high-date').textContent = 
+                        data.all_time_high_date ? new Date(data.all_time_high_date).toLocaleDateString() : '--';
+                    
+                    // All-time low
+                    document.getElementById('all-time-low').textContent = 
+                        data.all_time_low ? parseFloat(data.all_time_low).toFixed(2) + ' ft' : '--';
+                    document.getElementById('all-time-low-date').textContent = 
+                        data.all_time_low_date ? new Date(data.all_time_low_date).toLocaleDateString() : '--';
                 } else {
                     console.error('Failed to load stats:', data.error);
                     // Show error in stats
-                    document.getElementById('total-records').textContent = 'Error';
-                    document.getElementById('success-rate').textContent = 'Error';
-                    document.getElementById('avg-leesville').textContent = 'Error';
-                    document.getElementById('avg-smith').textContent = 'Error';
+                    document.getElementById('high-24h').textContent = 'Error';
+                    document.getElementById('low-24h').textContent = 'Error';
+                    document.getElementById('high-7d').textContent = 'Error';
+                    document.getElementById('low-7d').textContent = 'Error';
+                    document.getElementById('all-time-high').textContent = 'Error';
+                    document.getElementById('all-time-low').textContent = 'Error';
                 }
             } catch (error) {
                 console.error('Error loading stats:', error);
                 // Show error in stats
-                document.getElementById('total-records').textContent = 'Error';
-                document.getElementById('success-rate').textContent = 'Error';
-                document.getElementById('avg-leesville').textContent = 'Error';
-                document.getElementById('avg-smith').textContent = 'Error';
+                document.getElementById('high-24h').textContent = 'Error';
+                document.getElementById('low-24h').textContent = 'Error';
+                document.getElementById('high-7d').textContent = 'Error';
+                document.getElementById('low-7d').textContent = 'Error';
+                document.getElementById('all-time-high').textContent = 'Error';
+                document.getElementById('all-time-low').textContent = 'Error';
             }
         }
         
