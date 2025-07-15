@@ -209,6 +209,7 @@ async function scrapeWaterLevels() {
 // API Routes
 app.get('/api/current', async (req, res) => {
   try {
+    console.log('API /current called');
     const result = await pool.query(`
       SELECT leesville_forebay, smith_mountain_tailwater, timestamp, data_updated_at
       FROM water_levels 
@@ -217,19 +218,26 @@ app.get('/api/current', async (req, res) => {
       LIMIT 1
     `);
     
+    console.log('Current data query result:', result.rows.length, 'rows');
+    if (result.rows.length > 0) {
+      console.log('Latest data:', result.rows[0]);
+    }
+    
     if (result.rows.length === 0) {
+      console.log('No data found in database');
       return res.status(404).json({ error: 'No data available' });
     }
     
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('API error:', error);
+    console.error('API /current error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.get('/api/history', async (req, res) => {
   try {
+    console.log('API /history called with hours:', req.query.hours);
     const { hours = 24 } = req.query;
     const hoursInt = parseInt(hours);
     
@@ -245,15 +253,18 @@ app.get('/api/history', async (req, res) => {
       ORDER BY timestamp ASC
     `);
     
+    console.log('History query result:', result.rows.length, 'rows');
+    
     res.json(result.rows);
   } catch (error) {
-    console.error('API error:', error);
+    console.error('API /history error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 app.get('/api/stats', async (req, res) => {
   try {
+    console.log('API /stats called');
     const result = await pool.query(`
       SELECT 
         COUNT(*) as total_records,
@@ -266,9 +277,31 @@ app.get('/api/stats', async (req, res) => {
       WHERE timestamp >= NOW() - INTERVAL '30 days'
     `);
     
+    console.log('Stats query result:', result.rows[0]);
+    
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('API error:', error);
+    console.error('API /stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Debug endpoint to check recent database entries
+app.get('/api/debug', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT * FROM water_levels 
+      ORDER BY timestamp DESC 
+      LIMIT 10
+    `);
+    
+    res.json({
+      message: 'Latest 10 database entries',
+      count: result.rows.length,
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('API /debug error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
