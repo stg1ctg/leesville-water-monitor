@@ -1,20 +1,21 @@
-const puppeteer = require('puppeteer');
+const { chromium } = require('playwright');
 
 async function testScraper() {
   let browser;
   try {
     console.log('🚀 Starting scraper test...\n');
     
-    browser = await puppeteer.launch({
-      headless: false, // Set to true for production
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    // Connect to browserless service
+    const browserlessUrl = process.env.BROWSERLESS_URL || 'ws://localhost:3000';
+    console.log('🔗 Connecting to browserless service:', browserlessUrl);
     
+    browser = await chromium.connect(browserlessUrl);
     const page = await browser.newPage();
+    
     console.log('📄 Opening AEP hydro page...');
     
     await page.goto('https://www.aep.com/recreation/hydro', {
-      waitUntil: 'networkidle2',
+      waitUntil: 'networkidle',
       timeout: 30000
     });
 
