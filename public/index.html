@@ -378,6 +378,7 @@
     <script>
         let chart;
         let currentHours = 24;
+        let isUpdatingChart = false;
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
@@ -487,13 +488,27 @@
         }
 
         function updateChart(data) {
-            const ctx = document.getElementById('waterLevelChart').getContext('2d');
-
-            if (chart) {
-                chart.destroy();
+            // Prevent concurrent chart updates
+            if (isUpdatingChart) {
+                console.log('Chart update already in progress, skipping...');
+                return;
             }
+            
+            isUpdatingChart = true;
+            
+            try {
+                const ctx = document.getElementById('waterLevelChart').getContext('2d');
 
-            console.log('Updating chart with data:', data);
+                // Properly destroy existing chart if it exists
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+
+                // Clear the canvas to ensure clean state
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                console.log('Updating chart with data:', data);
 
             if (!data || data.length === 0) {
                 chart = new Chart(ctx, {
@@ -572,8 +587,8 @@
                             type: 'time',
                             time: {
                                 displayFormats: {
-                                    hour: 'MMM DD HH:mm',
-                                    day: 'MMM DD'
+                                    hour: 'MMM dd HH:mm',
+                                    day: 'MMM dd'
                                 }
                             },
                             title: {
@@ -627,6 +642,9 @@
                     }
                 }
             });
+            } finally {
+                isUpdatingChart = false;
+            }
         }
 
         async function loadStats() {
