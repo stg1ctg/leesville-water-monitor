@@ -1,10 +1,10 @@
 # Leesville Lake Water Level Monitor
 
-A real-time water level monitoring system for Leesville Lake and Smith Mountain that automatically scrapes data from AEP's hydro website every 15 minutes and displays historical trends.
+A water level monitoring and tracking system for Leesville Lake.
 
 ## Features
 
-- 🌊 **Real-time monitoring**: Automatically scrapes water levels every 15 minutes
+- 🌊 **Real-time monitoring**: Updated every 15 minutes
 - 📊 **Historical charts**: Interactive graphs showing 24 hours to 1 year of data
 - 📱 **Mobile responsive**: Works great on phones and tablets
 - 🎯 **Status indicators**: Visual alerts for normal/high/low water levels
