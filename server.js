@@ -356,7 +356,7 @@ app.get('/', (req, res) => {
 });
 
 // Schedule scraping every 15 minutes
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/5 * * * *', async () => {
   console.log('Running scheduled scrape...');
   try {
     await scrapeWaterLevels();
