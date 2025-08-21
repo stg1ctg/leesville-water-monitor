@@ -92,7 +92,11 @@ async function scrapeWaterLevels() {
     console.log('Connecting to browserless service...');
     console.log('Using connection URL:', connectionUrl.replace(browserlessToken, '***'));
     
-    browser = await chromium.connect(connectionUrl);
+    // Add explicit timeout and retry logic
+    browser = await chromium.connect(connectionUrl, {
+      timeout: 30000, // 30 second timeout
+      wsEndpoint: connectionUrl
+    });
     const page = await browser.newPage();
     
     await page.goto('https://www.aep.com/recreation/hydro', {
@@ -356,7 +360,7 @@ app.get('/', (req, res) => {
 });
 
 // Schedule scraping every 15 minutes
-cron.schedule('*/5 * * * *', async () => {
+cron.schedule('*/15 * * * *', async () => {
   console.log('Running scheduled scrape...');
   try {
     await scrapeWaterLevels();
